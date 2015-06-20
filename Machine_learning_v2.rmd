@@ -1,0 +1,47 @@
+---
+title: "Machine Learning"
+author: ''
+date: "20 June 2015"
+output: pdf_document
+---
+###Level-1 Reading Raw data from the directory
+```{r,echo=FALSE}
+setwd("/home/wissen/Coursera_Machine Learning/Course_project/")
+library(caret)
+library(rattle)
+library(randomForest)
+set.seed(1)
+training<-read.csv("pml-training.csv",na.strings=c("NA","#DIV/0!", ""))
+testing<-read.csv("pml-testing.csv",na.strings =c("NA","#DIV/0!", ""))
+```
+###Level-2 Preprocessing: Removing columns with NA's and removing the first 6 coloumns which are not much useful.
+```{r}
+training<-training[,colSums(is.na(training)) == 0]
+training<-training[,-c(1:7)]
+testing<-testing[,-c(1:7)]
+```
+###Level-3 Creating training and testing set from the training data set, we are partitio in the ration of 75:25.
+```{r}
+intrain<-createDataPartition(y=training$classe,p=0.75,list=FALSE)
+training_data<-training[intrain,]
+testing_data<-training[-intrain,]
+```
+### Level-4 Training the model using the training_data set.
+```{r}
+model2<-randomForest(classe~.,data=training_data,method="class")
+```
+### Using the model we are doing prediction on the testing_data and comparing the actual output and the predicted output
+```{r,echo=FALSE}
+prediction2<-predict(model2,testing_data,type="class")
+dt2<-data.frame(predicted=prediction2,actual=testing_data$classe)
+head(dt2)
+```
+### Cross Validation
+```{r,echo=FALSE}
+confusionMatrix(prediction2,testing_data$classe)
+```
+##Submission Part
+```{r,echo=FALSE}
+predict1<-predict(model2,testing)
+print(predict1)
+```
